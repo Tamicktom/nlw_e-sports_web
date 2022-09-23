@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Checkbox from '@radix-ui/react-checkbox';
-import * as Select from '@radix-ui/react-select';
+import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { Check, GameController } from 'phosphor-react';
 import Input from '../Form/Input';
 
@@ -18,6 +18,7 @@ interface Games {
 
 export default function CreateAdModal({ }: Props) {
     const [games, setGames] = useState<Games[]>([]);
+    const [weekDays, setWeekDays] = useState<string[]>([]);
 
     useEffect(
         () => {
@@ -26,6 +27,15 @@ export default function CreateAdModal({ }: Props) {
                 .then((data) => setGames(data))
         }, []);
 
+    function handleCreateAd(event: FormEvent) {
+        event.preventDefault();
+
+        const formData = new FormData(event.target as HTMLFormElement);
+        const data = Object.fromEntries(formData);
+
+        console.log(data);
+
+    }
 
     return (
         <Dialog.Portal>
@@ -33,7 +43,7 @@ export default function CreateAdModal({ }: Props) {
             <Dialog.Content
                 className='fixed bg-[#2a2634] py-8 px-10 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg w-[480px] shadow-lg shadow-black/25 font-semibold'>
                 <Dialog.Title className='text-3xl font-black'>Publique um anúncio</Dialog.Title>
-                <form className='mt-8 flex flex-col gap-4'>
+                <form onSubmit={handleCreateAd} className='mt-8 flex flex-col gap-4'>
                     <div className='flex flex-col gap-2'>
                         <label htmlFor="game">Qual o game?</label>
                         <select
@@ -47,46 +57,6 @@ export default function CreateAdModal({ }: Props) {
                                 {games.map((game) => { return (<option key={game.id} value={game.id}>{game.name}</option>) })}
                             </>
                         </select>
-
-                        <Select.Root>
-                            <Select.Trigger>
-                                <Select.Value />
-                                <Select.Icon />
-                            </Select.Trigger>
-
-                            <Select.Portal>
-                                <Select.Content>
-                                    <Select.Viewport>
-
-                                        <Select.Item value="">
-                                            <Select.ItemIndicator>
-                                                <Select.ItemText>
-                                                    <span>Qual o game que deseja jogar?</span>
-                                                </Select.ItemText>
-                                            </Select.ItemIndicator>
-                                        </Select.Item>
-
-                                        <Select.Item value="">
-                                            <Select.ItemIndicator>
-                                                <Select.ItemText>
-                                                    <span>Qual o game que deseja jogar?</span>
-                                                </Select.ItemText>
-                                            </Select.ItemIndicator>
-                                        </Select.Item>
-
-                                        <Select.Item value="">
-                                            <Select.ItemIndicator>
-                                                <Select.ItemText>
-                                                    <span>Qual o game que deseja jogar?</span>
-                                                </Select.ItemText>
-                                            </Select.ItemIndicator>
-                                        </Select.Item>
-
-                                    </Select.Viewport>
-                                </Select.Content>
-                            </Select.Portal>
-                        </Select.Root>
-
                     </div>
                     <div className='flex flex-col gap-2'>
                         <label htmlFor="name">Seu nome ou nickname</label>
@@ -107,15 +77,20 @@ export default function CreateAdModal({ }: Props) {
                     <div className='flex gap-6'>
                         <div className='flex flex-col gap-2'>
                             <label htmlFor="weekDays">Quando costuma jogar?</label>
-                            <div className='grid grid-cols-4 gap-2'>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Domingo">D</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Segunda">S</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Terça">T</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Quarta">Q</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Quinta">Q</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Sexta">S</button>
-                                <button className='w-8 h-8 rounded bg-zinc-900' title="Sábado">S</button>
-                            </div>
+                            <ToggleGroup.Root
+                                type={'multiple'}
+                                className='grid grid-cols-4 gap-2'
+                                value={weekDays}
+                                onValueChange={setWeekDays}
+                            >
+                                <DayOfWeek variable={weekDays} val="0" title="Domingo" />
+                                <DayOfWeek variable={weekDays} val="1" title="Segunda-feira" />
+                                <DayOfWeek variable={weekDays} val="2" title="Terça-feira" />
+                                <DayOfWeek variable={weekDays} val="3" title="Quarta-feira" />
+                                <DayOfWeek variable={weekDays} val="4" title="Quinta-feira" />
+                                <DayOfWeek variable={weekDays} val="5" title="Sexta-feira" />
+                                <DayOfWeek variable={weekDays} val="6" title="Sábado" />
+                            </ToggleGroup.Root>
                         </div>
                         <div className='flex flex-col gap-2 flex-1'>
                             <label htmlFor="hourStart">Qual horário do dia?</label>
@@ -126,14 +101,14 @@ export default function CreateAdModal({ }: Props) {
                         </div>
                     </div>
 
-                    <div className='mt-2 flex gap-2 text-sm items-center'>
+                    <label className='mt-2 flex gap-2 text-sm items-center'>
                         <Checkbox.Root className='w-6 h-6 p-1 rounded bg-zinc-900'>
                             <Checkbox.Indicator>
                                 <Check className='w-4 h-4 text-emerald-400' />
                             </Checkbox.Indicator>
                         </Checkbox.Root>
                         Costumo me conectar ao chat de voz
-                    </div>
+                    </label>
 
                     <footer className='mt-4 flex justify-end gap-4'>
                         <Dialog.Close type='button'
@@ -150,4 +125,22 @@ export default function CreateAdModal({ }: Props) {
             </Dialog.Content>
         </Dialog.Portal>
     )
+}
+
+interface DayOfWeekProps {
+    val: string;
+    title: string;
+    variable: string[];
+}
+
+const DayOfWeek = ({ val, title, variable }: DayOfWeekProps) => {
+    return (
+        <ToggleGroup.Item
+            value={val}
+            className={`w-8 h-8 rounded ${variable.includes(val) ? "bg-violet-500" : "bg-zinc-900"}`}
+            title={title}
+        >
+            {title[0]}
+        </ToggleGroup.Item>
+    );
 }
