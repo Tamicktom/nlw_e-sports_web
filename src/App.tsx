@@ -6,6 +6,7 @@ import './styles/main.css';
 import logoImg from './assets/logo-nlw-esports.svg';
 import * as Dialog from '@radix-ui/react-dialog';
 import CreateAdBanner from './Components/CreateAdBanner/CreateAdBanner';
+import axios from 'axios';
 interface Games {
   id: number;
   name: string;
@@ -20,9 +21,8 @@ function App() {
 
   useEffect(
     () => {
-      fetch('http://localhost:3000/games')
-        .then((response) => response.json())
-        .then((data) => setGames(data));
+      axios('http://localhost:3000/games')
+        .then((response) => setGames(response.data));
     }, []);
 
   return (
